@@ -732,7 +732,6 @@ function renderChatMeta() {
   $("cInput").placeholder = ready ? "Ask about a topic, the curriculum or a lesson idea" : "Choose a key stage and year first";
   $("cSend").disabled = !ready;
   $("cSend").textContent = chat.busy ? "Stop" : "Send";
-  $("cSend").classList.toggle("ghost", chat.busy);
   $("cNew").classList.toggle("hidden", !chat.messages.length);
 }
 
@@ -783,7 +782,7 @@ function renderLog() {
       if (!html) html = md(m.text || "");
       const extra = el("div");
       if (m.sources && m.sources.length) {
-        const s = el("details", { class: "src" }, el("summary", {}, `From the National Curriculum (${m.sources.length})`));
+        const s = el("details", { class: "src" }, el("summary", {}, "From the National Curriculum"));
         m.sources.forEach((q) => s.append(el("q", {}, q.text[0].toUpperCase() + q.text.slice(1)), el("div", { class: "t" }, q.topic)));
         s.append(el("a", { href: CUR.source.pdf, target: "_blank", rel: "noopener" }, "DfE, The national curriculum in England (2014)"));
         extra.append(s);
