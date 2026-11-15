@@ -124,7 +124,13 @@
   .ctx .chip{padding:6px 12px;font-size:14px}
   @media(max-width:760px){.ctx-row{grid-template-columns:1fr;gap:12px}}
   .src{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13.5px}
-  .src .k{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:4px}
+  .src{padding:7px 12px}
+  .src summary{cursor:pointer;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;list-style:none}
+  .src summary::-webkit-details-marker{display:none}
+  .src summary:before{content:"▸ ";letter-spacing:0}
+  .src[open] summary:before{content:"▾ "}
+  .src[open]{padding:10px 12px}
+  .src[open] summary{margin-bottom:4px}
   .src q{display:block;margin:4px 0;color:var(--ink)}
   .src .t{color:var(--muted);font-size:12.5px}
   .src a{color:var(--accent);font-size:12.5px}
@@ -777,7 +783,7 @@ function renderLog() {
       if (!html) html = md(m.text || "");
       const extra = el("div");
       if (m.sources && m.sources.length) {
-        const s = el("div", { class: "src" }, el("div", { class: "k" }, "From the National Curriculum"));
+        const s = el("details", { class: "src" }, el("summary", {}, `From the National Curriculum (${m.sources.length})`));
         m.sources.forEach((q) => s.append(el("q", {}, q.text[0].toUpperCase() + q.text.slice(1)), el("div", { class: "t" }, q.topic)));
         s.append(el("a", { href: CUR.source.pdf, target: "_blank", rel: "noopener" }, "DfE, The national curriculum in England (2014)"));
         extra.append(s);
