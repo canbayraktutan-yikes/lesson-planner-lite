@@ -116,6 +116,29 @@
   .modal pre{white-space:pre-wrap;background:var(--peach);border-radius:10px;padding:12px;font-family:var(--sans);font-size:13.5px;max-height:320px;overflow:auto}
   .modal ol{padding-left:18px;color:var(--muted);font-size:14px}
   .modal a.btn{text-decoration:none;display:inline-block}
+  .select{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .chat{padding:0;overflow:hidden}
+  .chat-top{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);gap:10px}
+  .chat-log{padding:22px 18px;min-height:340px;max-height:60vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+  .msg{display:flex;gap:10px;align-items:flex-end;max-width:88%}
+  .msg.me{align-self:flex-end;flex-direction:row-reverse}
+  .ava{flex:0 0 44px;width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(45,36,24,.15))}
+  .bubble{position:relative;padding:12px 15px;border-radius:18px;line-height:1.55;white-space:normal;word-wrap:break-word}
+  .msg.bot .bubble{background:var(--peach);border:1px solid var(--line);border-bottom-left-radius:6px}
+  .msg.bot .bubble:before{content:"";position:absolute;left:-7px;bottom:10px;width:12px;height:12px;background:var(--peach);border-left:1px solid var(--line);border-bottom:1px solid var(--line);transform:rotate(45deg)}
+  .msg.me .bubble{background:var(--accent);color:#fff;border-bottom-right-radius:6px}
+  .bubble ul{margin:6px 0;padding-left:18px}
+  .bubble p{margin:0 0 6px}.bubble p:last-child{margin:0}
+  .offer{margin-top:10px}
+  .typing span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin:0 2px;animation:blink 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+  .hello{text-align:center;margin:auto;max-width:440px}
+  .hello img{width:96px;height:auto;margin-bottom:8px;filter:drop-shadow(0 4px 8px rgba(45,36,24,.15))}
+  .hello h2{font-style:italic;color:var(--ink2)}
+  .starters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+  .chat-input{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--line);align-items:flex-end}
+  .chat-input textarea{resize:none;max-height:160px}
   footer{text-align:center;color:var(--muted);font-size:12.5px;padding:24px}
   footer a{color:var(--muted)}
   .hidden{display:none !important}
@@ -125,8 +148,8 @@
 <header>
   <div class="brand"><a href="/" class="home" aria-label="Madlen home"><svg class="logo" role="img" aria-label="Madlen" viewBox="0 0 105 24" xmlns="http://www.w3.org/2000/svg" width="105" height="24" fill="none"><path fill="#d97757" d="m38.353 10.664.012.021.011-.02C39.126 9.25 40.52 8.5 42.222 8.5c1.283 0 2.41.387 3.215 1.19.806.803 1.293 2.024 1.293 3.695v6.327h-2.08v-6.327c0-1.021-.272-1.761-.737-2.246-.466-.485-1.123-.713-1.89-.713-.745 0-1.397.24-1.862.73-.465.49-.743 1.23-.743 2.23v6.326h-2.084v-6.327c0-1-.283-1.74-.754-2.23-.471-.49-1.128-.729-1.873-.729-.767 0-1.424.228-1.89.713-.466.485-.738 1.225-.738 2.246v6.327H30v-6.327c0-1.67.487-2.892 1.293-3.695.806-.803 1.933-1.19 3.215-1.19 1.68 0 3.093.75 3.845 2.164Zm21.852 3.676v5.372H58.3v-2.38l-.024-.005C57.547 19.094 55.935 20 54.033 20c-2.853 0-5.55-2.056-5.55-5.66 0-1.716.608-3.175 1.65-4.206C51.175 9.103 52.651 8.5 54.388 8.5c1.715 0 3.169.586 4.194 1.609 1.025 1.022 1.623 2.482 1.623 4.23Zm-2.06-.09c0-1.111-.377-2.068-1.04-2.746-.661-.678-1.607-1.078-2.74-1.078-1.133 0-2.078.4-2.74 1.08-.663.678-1.04 1.634-1.04 2.744 0 1.11.377 2.066 1.04 2.745.662.678 1.607 1.079 2.74 1.079 1.133 0 2.079-.4 2.74-1.078.663-.678 1.04-1.635 1.04-2.746Zm13.431-3.54.024.043V4h2.08v10.16c0 1.782-.61 3.242-1.64 4.256C71.009 19.43 69.555 20 67.863 20c-1.737 0-3.214-.597-4.255-1.622-1.042-1.026-1.651-2.48-1.651-4.194 0-3.628 2.698-5.684 5.551-5.684 1.77 0 3.272.797 4.068 2.21Zm.024 3.54c0-1.111-.378-2.068-1.037-2.746-.66-.678-1.6-1.078-2.72-1.078-1.134 0-2.08.4-2.741 1.08-.662.678-1.04 1.634-1.04 2.744 0 1.11.378 2.066 1.04 2.745.662.679 1.607 1.079 2.74 1.079 1.122 0 2.062-.4 2.72-1.078.66-.678 1.038-1.635 1.038-2.746ZM76.275 4h2.08v15.71h-2.08V4Zm13.181 12.679h2.3C90.913 18.702 88.928 20 86.392 20c-3.45 0-5.883-2.433-5.883-5.75S82.94 8.5 86.39 8.5s5.839 2.433 5.839 5.75v.763h-9.532l.002.014c.157.98.601 1.741 1.246 2.258.646.517 1.49.789 2.446.789 1.418 0 2.419-.443 3.065-1.395Zm.57-3.523h.016l-.004-.016c-.422-1.757-1.87-2.714-3.647-2.714-.91 0-1.711.244-2.337.706-.626.462-1.077 1.14-1.288 2.008l-.004.016h7.264Zm3.954.872c0-1.825.542-3.207 1.487-4.132.944-.925 2.293-1.396 3.909-1.396 1.615 0 2.963.465 3.908 1.387.945.923 1.487 2.304 1.487 4.141v5.684h-2.081v-5.684c0-1.189-.328-2.09-.907-2.693-.579-.604-1.408-.909-2.407-.909-1 0-1.83.306-2.409.91-.58.604-.907 1.505-.907 2.692v5.684h-2.08v-5.684Z"/><path fill="#d97757" fill-rule="evenodd" d="M15.385 1.493C13.711-.372 10.698-.535 8.88 1.26l-.042.04-.036.046c-.192.24-.522.363-1.198.354-1.244-.05-2.179.175-2.878.735-.635.509-.942 1.206-1.155 1.692l-.028.063c-.297.672-.517 1.132-1.066 1.49-.589.326-1.25.726-1.734 1.307-.53.636-.801 1.425-.731 2.406.036 2.762 1.095 5.326 2.04 7.614l.036.089.16.387c.122.295.233.58.345.867l.011.028c.3.769.607 1.552 1.06 2.343l.045.08.026.046c.347.608.827 1.448 1.469 2.088.693.691 1.674 1.243 2.95 1.011l.01-.002.01-.002c.504-.102.994-.247 1.435-.378l.02-.006c.925-.274 1.655-.481 2.4-.44l.022.002h.021c.826.012 1.638.24 2.598.517l.003.001c.283.082.58.167.88.246l.01.003.011.003c1.809.43 3.127-.495 3.983-1.59.831-1.063 1.365-2.44 1.71-3.382.24-.658.501-1.313.768-1.984l.036-.089c.988-2.478 2.067-5.184 1.916-8.148-.072-1.53-1.245-2.265-1.934-2.696l-.087-.055c-.439-.277-.716-.461-.9-.673-.228-.3-.375-.627-.559-1.048l-.021-.048c-.17-.392-.4-.92-.795-1.366-.446-.505-1.047-.855-1.87-1.022-.457-.105-.923-.102-1.261-.1h-.04c-.734.004-.965-.038-1.134-.196Zm-5.064 1.164c-.806.956-1.957 1.063-2.763 1.05h-.026c-.987-.043-1.373.15-1.553.295-.218.175-.352.431-.602.999l-.018.042c-.298.675-.725 1.644-1.83 2.347l-.027.017-.028.016c-.591.325-.963.577-1.192.85-.185.222-.308.497-.269.997l.003.034v.035c.025 2.354.937 4.596 1.922 6.981l.004.011.16.388c.129.313.246.613.357.896l.001.003c.312.797.57 1.454.944 2.106l.046.08v.001c.378.662.737 1.278 1.168 1.708.395.393.746.533 1.169.46a15.285 15.285 0 0 0 1.332-.358c.851-.253 1.885-.56 3.001-.502 1.111.02 2.155.32 3.054.58l.051.015c.284.082.554.16.823.23.75.175 1.341-.124 1.928-.874.614-.786 1.058-1.884 1.405-2.835a72.72 72.72 0 0 1 .787-2.03l.003-.008c1.027-2.578 1.938-4.905 1.811-7.394v-.005c-.018-.402-.246-.618-1.086-1.147l-.047-.03c-.389-.244-.926-.583-1.33-1.062l-.015-.017-.013-.017c-.399-.516-.634-1.055-.81-1.46l-.013-.03c-.198-.453-.315-.7-.481-.888-.128-.145-.326-.297-.774-.386l-.017-.004-.017-.004c-.21-.049-.456-.053-.85-.05h-.086c-.617.006-1.679.015-2.493-.801l-.022-.022-.02-.023c-.923-1.046-2.6-1.128-3.587-.194Z" clip-rule="evenodd"/><path fill="#d97757" fill-rule="evenodd" d="M17.806 9.56a22.58 22.58 0 0 0-.007-.327c-.025-.846-.146-1.799-1.044-1.95-.425-.07-.933.183-1.171.54-.163.245-.214.547-.23.842a43.975 43.975 0 0 1-.34 3.545c-.067.5-.138.998-.21 1.496-.066.468-.134.936-.197 1.405-.021.16-.045.32-.07.483-.118.79-.24 1.609-.101 2.393.032.184.103.437.298.505.192.067.384-.09.505-.222.326-.357.533-.835.732-1.291.054-.125.107-.248.162-.367.274-.593.54-1.202.766-1.81.32-.867.584-1.759.746-2.672.066-.37.102-.74.138-1.111l.026-.262c.025-.242.027-.485.011-.727-.009-.141-.011-.3-.014-.47ZM6.22 9.242c-.117 1.313.045 2.648.376 3.924.388 1.493 1.004 2.916 1.685 4.295.14.285.287.572.5.806.145.157.376.292.559.184.12-.072.17-.221.2-.36.19-.826.063-1.646-.065-2.467l-.06-.385a148.26 148.26 0 0 1-.41-2.979 65.692 65.692 0 0 1-.358-3.53c-.023-.3-.046-.612-.199-.868-.175-.294-.499-.471-.831-.531-.233-.043-.483-.032-.692.08-.4.212-.547.712-.621 1.164a9.71 9.71 0 0 0-.084.667Zm5.677 9.714c1.524 0 1.564-11.422 1.564-12.23a1.462 1.462 0 1 0-2.922 0c0 .808 0 12.23 1.358 12.23Z" clip-rule="evenodd"/></svg></a>
     <nav class="tabs">
-      <a class="tab on" href="#">Lesson Planner</a>
-      <span class="tab soon" title="Coming soon">Teacher Chatbot</span>
+      <a class="tab on" href="#planner" data-view="planner">Lesson Planner</a>
+      <a class="tab" href="#chat" data-view="chat">Teacher Chatbot</a>
       <span class="tab soon" title="Coming soon">Essay Marker</span>
     </nav>
   </div>
@@ -134,6 +157,7 @@
 </header>
 
 <main>
+ <div id="view-planner">
   <div class="steps" id="steps">
     <div class="step" data-s="1"><b>1</b>Pick your topic</div>
     <div class="step" data-s="2"><b>2</b>Shape the lesson</div>
@@ -234,6 +258,32 @@
       <button class="btn accent" id="toMadlen">Create slides in Madlen</button>
     </div>
   </section>
+ </div>
+
+ <div id="view-chat" class="hidden">
+  <p class="label">Teacher Chatbot</p>
+  <h1>Ask Madlen</h1>
+  <p class="sub">Questions about a topic, the curriculum or a lesson idea. Answers are pitched to the year you teach.</p>
+
+  <div class="card">
+    <div class="field"><h3>Key stage</h3><div class="chips" id="cKs"></div></div>
+    <div class="field hidden" id="cYearF"><h3>Year</h3><div class="chips" id="cYear"></div></div>
+    <div class="field hidden" id="cSubjF"><h3>Subject <span class="hint">(optional)</span></h3><div class="chips" id="cSubj"></div></div>
+    <div class="field hidden" id="cTopicF"><h3>Topic <span class="hint">(optional)</span></h3>
+      <select id="cTopic" class="select"></select>
+      <p class="hint" style="margin:8px 0 0">Pick a topic and Madlen answers from its official curriculum statements.</p>
+    </div>
+  </div>
+
+  <div class="chat card">
+    <div class="chat-top"><span class="hint" id="cCtx">Choose a key stage and year to start.</span><button class="btn ghost small hidden" id="cNew" type="button">New chat</button></div>
+    <div id="cLog" class="chat-log"></div>
+    <div class="chat-input">
+      <textarea id="cInput" rows="1" maxlength="1500" placeholder="Choose a key stage and year first" disabled></textarea>
+      <button class="btn accent" id="cSend" type="button" disabled>Send</button>
+    </div>
+  </div>
+ </div>
 </main>
 
 <div class="modal-bg" id="modal">
@@ -605,10 +655,169 @@ $("downloadWord").onclick = () => downloadWord().catch((e) => showErr("Word expo
 $("startOver").onclick = () => { if (confirmNew()) { plan = null; Object.assign(sel, { ks: null, subject: null, section: undefined, topic: null, focus: null, lessonType: null, method: null }); $("classNotes").value = ""; renderS1(); setStep(1); } };
 function confirmNew() { const b = $("startOver"); if (b.dataset.armed) { delete b.dataset.armed; b.textContent = "New lesson"; return true; } b.dataset.armed = "1"; b.textContent = "Click again to start over"; setTimeout(() => { delete b.dataset.armed; b.textContent = "New lesson"; }, 3000); return false; }
 
+// ================= TEACHER CHATBOT =================
+const YEARS = { KS1: [1, 2], KS2: [3, 4, 5, 6], KS3: [7, 8, 9] };
+const chat = { ks: null, year: null, subject: null, topicKey: "", messages: [], busy: false };
+
+function sectionForYear(title, year) {
+  if (!title) return true;
+  if (/^Spoken language/.test(title)) return year <= 6;
+  if (/^Years? \d/.test(title)) { const n = (title.match(/\d+/g) || []).map(Number); return n.length === 2 ? year >= n[0] && year <= n[1] : n[0] === year; }
+  return true;
+}
+function chatSubject() { const k = CUR.keyStages.find((x) => x.id === chat.ks); return k && k.subjects.find((s) => s.name === chat.subject); }
+function chatTopic() {
+  if (!chat.topicKey) return null;
+  const [si, ti] = chat.topicKey.split("|").map(Number);
+  const s = chatSubject(); const sec = s && s.sections[si];
+  return sec ? { section: sec.title, topic: sec.topics[ti] } : null;
+}
+
+function renderChatCtx() {
+  const ks = $("cKs"); ks.innerHTML = "";
+  CUR.keyStages.forEach((k) => ks.append(chip(k.id.replace("KS", "Key Stage "), chat.ks === k.id, () => { chat.ks = k.id; chat.year = null; chat.subject = null; chat.topicKey = ""; renderChatCtx(); }, k.label)));
+  $("cYearF").classList.toggle("hidden", !chat.ks);
+  if (chat.ks) {
+    const y = $("cYear"); y.innerHTML = "";
+    YEARS[chat.ks].forEach((n) => y.append(chip("Year " + n, chat.year === n, () => { chat.year = n; chat.topicKey = ""; renderChatCtx(); })));
+  }
+  $("cSubjF").classList.toggle("hidden", !chat.year);
+  if (chat.year) {
+    const s = $("cSubj"); s.innerHTML = "";
+    s.append(chip("Any subject", !chat.subject, () => { chat.subject = null; chat.topicKey = ""; renderChatCtx(); }));
+    CUR.keyStages.find((x) => x.id === chat.ks).subjects.forEach((x) => s.append(chip(x.name, chat.subject === x.name, () => { chat.subject = x.name; chat.topicKey = ""; renderChatCtx(); })));
+  }
+  const subj = chat.year && chatSubject();
+  $("cTopicF").classList.toggle("hidden", !subj);
+  if (subj) {
+    const sel = $("cTopic"); sel.innerHTML = "";
+    sel.append(el("option", { value: "" }, "Any topic in " + subj.name));
+    subj.sections.forEach((sec, si) => {
+      if (!sectionForYear(sec.title, chat.year)) return;
+      const parent = sec.title ? el("optgroup", { label: sec.title }) : sel;
+      sec.topics.forEach((t, ti) => { const o = el("option", { value: si + "|" + ti }, t.title.length > 110 ? t.title.slice(0, 107) + "..." : t.title); if (chat.topicKey === si + "|" + ti) o.selected = true; parent.append(o); });
+      if (sec.title) sel.append(parent);
+    });
+    sel.onchange = () => { chat.topicKey = sel.value; renderChatMeta(); if (!chat.messages.length) renderLog(); };
+  }
+  renderChatMeta();
+  if (!chat.messages.length) renderLog();
+}
+
+function ctxLabel() {
+  if (!chat.ks || !chat.year) return "";
+  const t = chatTopic();
+  return ["Year " + chat.year, chat.subject, t && t.topic.title].filter(Boolean).join(" · ");
+}
+function renderChatMeta() {
+  const ready = Boolean(chat.ks && chat.year);
+  $("cCtx").textContent = ready ? "Answering for: " + ctxLabel() : "Choose a key stage and year to start.";
+  $("cInput").disabled = !ready || chat.busy;
+  $("cInput").placeholder = ready ? "Ask about a topic, the curriculum or a lesson idea" : "Choose a key stage and year first";
+  $("cSend").disabled = !ready || chat.busy;
+  $("cNew").classList.toggle("hidden", !chat.messages.length);
+}
+
+function esc(s) { return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function md(text) {
+  const lines = esc(text).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").split(/\n/);
+  let html = "", inList = false;
+  lines.forEach((l) => {
+    const m = l.match(/^\s*(?:[-*•]|\d+\.)\s+(.*)/);
+    if (m) { if (!inList) { html += "<ul>"; inList = true; } html += "<li>" + m[1] + "</li>"; }
+    else { if (inList) { html += "</ul>"; inList = false; } if (l.trim()) html += "<p>" + l + "</p>"; }
+  });
+  if (inList) html += "</ul>";
+  return html;
+}
+
+const MASCOT = "mascot.webp";
+function botMsg(html, extra) {
+  const b = el("div", { class: "bubble" }); b.innerHTML = html; if (extra) b.append(extra);
+  return el("div", { class: "msg bot" }, el("img", { class: "ava", src: MASCOT, alt: "Madlen" }), b);
+}
+function starters() {
+  const t = chatTopic();
+  if (t) {
+    const name = t.topic.title.length > 60 ? "this topic" : t.topic.title.toLowerCase();
+    return [`What does the curriculum say about ${name}?`, `What misconceptions do pupils have about ${name}?`, `Give me 3 ways to hook pupils into ${name}`, `Help me plan a lesson on ${name}`];
+  }
+  if (chat.subject) return [`What do Year ${chat.year} pupils learn in ${chat.subject}?`, "Give me a quick starter activity", "How can I check understanding without marking?"];
+  return ["How can I check understanding without marking?", "Give me a 5 minute starter idea", `How can I support Year ${chat.year} pupils who find reading hard?`];
+}
+function renderLog() {
+  const log = $("cLog"); log.innerHTML = "";
+  if (!chat.messages.length) {
+    const hello = el("div", { class: "hello" }, el("img", { src: MASCOT, alt: "Madlen" }), el("h2", {}, "Hi, I'm Madlen!"));
+    if (chat.ks && chat.year) {
+      hello.append(el("p", { class: "hint" }, `Ask me anything about teaching ${ctxLabel()}.`));
+      const st = el("div", { class: "starters" });
+      starters().forEach((q) => st.append(el("button", { class: "chip", type: "button", onclick: () => send(q) }, q)));
+      hello.append(st);
+    } else hello.append(el("p", { class: "hint" }, "Choose a key stage and year above, then ask me anything about your lesson."));
+    log.append(hello); return;
+  }
+  chat.messages.forEach((m) => {
+    if (m.role === "teacher") log.append(el("div", { class: "msg me" }, el("div", { class: "bubble" }, m.text)));
+    else {
+      let extra = null;
+      if (m.offer) extra = el("div", { class: "offer" }, el("button", { class: "btn small accent", type: "button", onclick: () => planFromChat(m.offer) }, "Plan this lesson"));
+      log.append(botMsg(md(m.text), extra));
+    }
+  });
+  if (chat.busy) log.append(botMsg('<span class="typing"><span></span><span></span><span></span></span>'));
+  log.scrollTop = log.scrollHeight;
+}
+
+async function send(text) {
+  text = (text ?? $("cInput").value).trim();
+  if (!text || chat.busy || !chat.ks || !chat.year) return;
+  showErr("");
+  chat.messages.push({ role: "teacher", text });
+  $("cInput").value = ""; autoGrow();
+  chat.busy = true; renderChatMeta(); renderLog();
+  const t = chatTopic();
+  const ctx = { ks: chat.ks, year: chat.year, subject: chat.subject, section: t ? t.section : null, topic: t ? t.topic.title : null };
+  try {
+    const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ context: ctx, messages: chat.messages.map((m) => ({ role: m.role, text: m.text })) }) });
+    let data; try { data = await r.json(); } catch { throw new Error("The server did not answer. Please try again."); }
+    if (!r.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+    chat.messages.push({ role: "assistant", text: data.reply, offer: data.offerLessonPlan && t ? { ks: chat.ks, subject: chat.subject, section: t.section, topic: t.topic.title } : null });
+  } catch (e) {
+    chat.messages.push({ role: "assistant", text: "Sorry, I couldn't answer just now. " + e.message });
+  }
+  chat.busy = false; renderChatMeta(); renderLog();
+  $("cInput").focus();
+}
+
+function planFromChat(o) {
+  Object.assign(sel, { ks: o.ks, subject: o.subject, section: o.section, topic: o.topic, focus: null });
+  location.hash = "#planner";
+  renderS1(); setStep(1);
+  setTimeout(() => $("lengthCard").scrollIntoView({ behavior: "smooth", block: "center" }), 100);
+}
+
+function autoGrow() { const t = $("cInput"); t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 160) + "px"; }
+$("cInput").addEventListener("input", autoGrow);
+$("cInput").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+$("cSend").onclick = () => send();
+$("cNew").onclick = () => { chat.messages = []; renderChatMeta(); renderLog(); };
+
+// ================= VIEWS =================
+function showView() {
+  const v = location.hash === "#chat" ? "chat" : "planner";
+  $("view-planner").classList.toggle("hidden", v !== "planner");
+  $("view-chat").classList.toggle("hidden", v !== "chat");
+  document.querySelectorAll(".tab[data-view]").forEach((t) => t.classList.toggle("on", t.dataset.view === v));
+  showErr("");
+  window.scrollTo({ top: 0 });
+}
+window.addEventListener("hashchange", showView);
+
 fetch("curriculum.json").then((r) => r.json()).then((d) => {
   CUR = d;
   $("srcTop").href = d.source.url; $("srcFoot").href = d.source.pdf;
-  renderS1(); setStep(1);
+  renderS1(); setStep(1); renderChatCtx(); showView();
 }).catch(() => showErr("The curriculum could not load. Please refresh the page."));
 </script>
 </body>
