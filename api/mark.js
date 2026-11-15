@@ -39,7 +39,26 @@ function expectationList(fw) {
   return list;
 }
 
-function buildPrompt(year, fw, list, approach, task, essay) {
+function proofPrompt(year, essay) {
+  return `You are a careful proofreader for a teacher in England. Read this Year ${year} pupil's writing one sentence at a time and list every clear error in:
+- spelling (including common words and homophones)
+- capital letters and full stops
+- apostrophes for possession (for example peoples freedom should be people's freedom) and for contraction
+- commas that the sentence needs (after fronted adverbials and after introductory phrases such as In conclusion, On the other hand, However; before a conjunction joining two long main clauses; in lists)
+- question marks, speech punctuation
+- tense consistency and subject-verb agreement, Standard English verb forms
+Only list real errors a UK primary or secondary teacher would correct. Do not list style preferences.
+For each error copy the shortest exact passage from the writing that contains it (3 to 12 words, character for character), give the type and the corrected version of that passage.
+
+WRITING
+"""
+${essay}
+"""
+
+Return only JSON: {"errors": [{"quote": "exact text", "type": "spelling", "fix": "corrected text"}]}`;
+}
+
+function buildPrompt(year, fw, list, approach, task, essay, errors) {
   return `You are an experienced teacher in England marking a pupil's extended writing. The writing may come from any subject (for example English, history or science).
 
 PUPIL
@@ -51,6 +70,9 @@ ${list.map((e) => `${e.id} [${e.group}] ${e.text}`).join("\n")}
 
 CRITERIA (score 0 to 5 against what is expected for Year ${year}: 3 = secure for Year ${year}, 5 = well above, 1 = well below)
 ${CRITERIA.map((c, i) => `${i + 1}. ${c.name}: ${c.desc}`).join("\n")}
+
+ERRORS FOUND BY A PROOFREADER (trust this list; use it for Punctuation and spelling and Clarity and grammar)
+${errors.length ? errors.map((e, i) => `${i + 1}. [${e.type}] "${e.quote}" -> "${e.fix}"`).join("\n") : "None found."}
 
 FEEDBACK APPROACH
 ${APPROACH[approach]}
@@ -90,7 +112,19 @@ module.exports = async (req, res) => {
     const list = expectationList(fw);
     const byId = Object.fromEntries(list.map((e) => [e.id, e]));
 
-    const raw = await callGemini(buildPrompt(year, fw, list, approach, task, essay), { temperature: 0.3 });
+    // Pass 1: proofreading only
+    let errors = [];
+    try {
+      const pr = await callGemini(proofPrompt(year, essay), { temperature: 0, budget: 24000 });
+      (Array.isArray(pr?.errors) ? pr.errors : []).forEach((e) => {
+        const exact = findInEssay(essay, e?.quote);
+        const fix = clean(e?.fix);
+        if (exact && fix && fix !== exact && !errors.some((x) => x.quote === exact)) errors.push({ quote: exact, type: clean(e.type) || "error", fix });
+      });
+    } catch (e) { errors = []; }
+    errors = errors.slice(0, 15);
+    // Pass 2: marking with the error list
+    const raw = await callGemini(buildPrompt(year, fw, list, approach, task, essay, errors), { temperature: 0, budget: 30000 });
     const onTopic = raw?.onTopic !== false;
     const got = Array.isArray(raw?.criteria) ? raw.criteria : [];
     const criteria = CRITERIA.map((c, i) => {
@@ -110,9 +144,15 @@ module.exports = async (req, res) => {
       if (!exact || highlights.some((x) => x.quote === exact)) return;
       highlights.push({ quote: exact, type: h.type === "strength" ? "strength" : "improve", comment: clean(h.comment) });
     });
+    // Guarantee: every proofread error is shown, even if the marker left it out
+    const overlaps = (q) => { const i = essay.indexOf(q); return highlights.some((h) => { const j = essay.indexOf(h.quote); return i < j + h.quote.length && j < i + q.length; }); };
+    errors.forEach((e) => {
+      if (overlaps(e.quote)) return;
+      highlights.push({ quote: e.quote, type: "improve", comment: `Check the ${e.type.toLowerCase()} here. Try: "${e.fix}"` });
+    });
     return res.status(200).json({
       onTopic, offTopicNote: onTopic ? "" : clean(raw?.offTopicNote) || "This writing does not answer the task.",
-      criteria, highlights: highlights.slice(0, 8), summary: clean(raw?.summary),
+      criteria, highlights: highlights.slice(0, 16), summary: clean(raw?.summary),
     });
   } catch (e) {
     return res.status(500).json({ error: e.message || "Something went wrong" });
