@@ -29,11 +29,16 @@ function grounding(ctx) {
   if (!ks) return { error: "Invalid key stage" };
   const year = Number(ctx.year);
   if (!YEARS[ks.id].includes(year)) return { error: "Invalid year" };
-  if (!ctx.subject) return { ks, year, pool: [], text: "" };
+  const pool = [];
+  if (!ctx.subject) {
+    ks.subjects.forEach((subj) => subj.sections.filter((s) => sectionMatchesYear(s.title, year)).forEach((sec) =>
+      sec.topics.forEach((t) => t.statements.forEach((s) => pool.push({ topic: `${subj.name} · ${t.title}`, text: s.text, details: s.details })))));
+    const text = pool.map((s) => `- [${s.topic}] ${s.text}${s.details.length ? ": " + s.details.join("; ") : ""}`).join("\n");
+    return { ks, year, pool, text: `All statutory statements for Year ${year}, across every subject, with subject and topic in brackets:\n${text}` };
+  }
   const subject = ks.subjects.find((s) => s.name === ctx.subject);
   if (!subject) return { error: "Invalid subject" };
   const sections = subject.sections.filter((s) => sectionMatchesYear(s.title, year));
-  const pool = [];
   const add = (t) => t.statements.forEach((s) => pool.push({ topic: t.title, text: s.text, details: s.details }));
   const fmt = () => pool.map((s) => `- [${s.topic}] ${s.text}${s.details.length ? ": " + s.details.join("; ") : ""}`).join("\n");
   if (ctx.topic) {
@@ -58,7 +63,10 @@ function buildPrompt(ctx, g, messages) {
 CONTEXT CHOSEN BY THE TEACHER
 - Key stage: ${g.ks.id} (pupils aged ${KS_AGES[g.ks.id]})
 - Year: Year ${g.year} (pupils aged ${YEAR_AGES[g.year]})
-${g.subject ? `- Subject: ${g.subject.name}\n` : "- Subject: not chosen\n"}${g.text ? `\nNATIONAL CURRICULUM (The national curriculum in England, DfE 2014):\n${g.text}\n` : "\nNo subject is chosen, so you have no curriculum text. Do not quote or describe the curriculum; if asked, suggest the teacher picks a subject.\n"}
+${g.subject ? `- Subject: ${g.subject.name}\n` : "- Subject: any (work out the subject from the question)\n"}
+NATIONAL CURRICULUM (The national curriculum in England, DfE 2014):
+${g.text}
+
 HOW TO ANSWER
 - Answer the teacher's actual question directly in the first sentence. No filler, no praise, no "great question", no "it is lots of fun".
 - Be specific to Year ${g.year}${g.subject ? ` ${g.subject.name}` : ""}: name the exact skills, facts, numbers, texts or examples a Year ${g.year} teacher would use. Generic advice that fits any year is not good enough.
