@@ -370,12 +370,12 @@ const topicObj = () => secObj()?.topics.find((t) => t.title === sel.topic);
 function yearText() {
   const s = secObj();
   if (s && s.title && /^Years? \d/.test(s.title)) return s.title.replace(/ \(.*\)$/, "");
-  const k = ksObj(); return `${k.id.replace("KS", "Key Stage ")} (${k.label})`;
+  return ksObj().id.replace("KS", "Key Stage ");
 }
 function shortYear() {
   const s = secObj();
   if (s && s.title && /^Years? \d/.test(s.title)) return s.title.replace(/ \(.*\)$/, "");
-  return ksObj().label;
+  return ksObj().id.replace("KS", "Key Stage ");
 }
 
 // ---------- step 1 render ----------
@@ -383,7 +383,7 @@ function chip(label, on, onclick, small) { return el("button", { class: "chip" +
 
 function renderS1() {
   const ks = $("ksChips"); ks.innerHTML = "";
-  CUR.keyStages.forEach((k) => ks.append(chip(k.id.replace("KS", "Key Stage "), sel.ks === k.id, () => { sel.ks = k.id; sel.subject = null; sel.section = undefined; sel.topic = null; sel.focus = null; renderS1(); }, k.label)));
+  CUR.keyStages.forEach((k) => ks.append(chip(k.id.replace("KS", "Key Stage "), sel.ks === k.id, () => { sel.ks = k.id; sel.subject = null; sel.section = undefined; sel.topic = null; sel.focus = null; renderS1(); })));
 
   const k = ksObj();
   $("subjectField").classList.toggle("hidden", !k);
@@ -691,7 +691,7 @@ function chatTopic() {
 
 function renderChatCtx() {
   const ks = $("cKs"); ks.innerHTML = "";
-  CUR.keyStages.forEach((k) => ks.append(chip(k.id.replace("KS", "Key Stage "), chat.ks === k.id, () => { chat.ks = k.id; chat.year = null; chat.subject = null; chat.topicKey = ""; renderChatCtx(); }, k.label)));
+  CUR.keyStages.forEach((k) => ks.append(chip(k.id.replace("KS", "Key Stage "), chat.ks === k.id, () => { chat.ks = k.id; chat.year = null; chat.subject = null; chat.topicKey = ""; renderChatCtx(); })));
   $("cYearF").classList.toggle("hidden", !chat.ks);
   if (chat.ks) {
     const y = $("cYear"); y.innerHTML = "";
