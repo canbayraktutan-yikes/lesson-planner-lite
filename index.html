@@ -122,6 +122,27 @@
   .ctx-row > div{min-width:0}
   #cYearF,.ctx .right{text-align:right}
   #cYearF .chips,.ctx .right .chips{justify-content:flex-end}
+  .approach{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:760px){.approach{grid-template-columns:1fr}}
+  .appr{border:2px solid transparent;border-radius:14px;padding:14px;cursor:pointer;text-align:left;font:inherit;color:var(--ink);background:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+  .appr .t{font-family:Lora,Georgia,serif;font-weight:700;font-size:16px;margin-bottom:4px}
+  .appr .d{font-size:13px;color:var(--muted)}
+  .appr .bar{height:6px;border-radius:3px;margin-bottom:10px}
+  .appr[data-a=strict] .bar{background:linear-gradient(90deg,#D9534F,#E8833A)}
+  .appr[data-a=balanced] .bar{background:linear-gradient(90deg,#E8A33A,#D9C53A)}
+  .appr[data-a=encouraging] .bar{background:linear-gradient(90deg,#A8C64A,#4CAF50)}
+  .appr.on[data-a=strict]{background:linear-gradient(135deg,#FDECEA,#FDF1E6);border-color:#E06B45;box-shadow:none}
+  .appr.on[data-a=balanced]{background:linear-gradient(135deg,#FDF4E3,#FBF6DD);border-color:#DDB23A;box-shadow:none}
+  .appr.on[data-a=encouraging]{background:linear-gradient(135deg,#F1F8E6,#E7F5E8);border-color:#6DB54C;box-shadow:none}
+  .fw{margin-top:14px}
+  .fw summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:14px}
+  .fw h4{font-family:Lora,Georgia,serif;margin:12px 0 4px;font-size:15px}
+  .fw ul{margin:0;padding-left:18px;font-size:13.5px}
+  .fw li{margin:2px 0}
+  .checks{list-style:none;padding:0;margin:8px 0 0;font-size:13px}
+  .checks li{display:flex;gap:6px;margin:3px 0;color:var(--ink)}
+  .checks li b{flex:0 0 14px}
+  .checks li.ok b{color:var(--ok)}.checks li.no b{color:var(--warn)}
   .crit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
   @media(max-width:760px){.crit-grid{grid-template-columns:1fr}}
   .crit{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
@@ -331,16 +352,18 @@
 
  <div id="view-marker" class="hidden">
   <p class="label">Essay Marker</p>
-  <h1>Mark an essay</h1>
-  <p class="sub">Paste a pupil's essay and get suggested scores, comments on the text and a short summary. You check and change everything.</p>
+  <h1>Mark a piece of writing</h1>
+  <p class="sub">Paste or photograph a pupil's writing. It is marked against the official writing expectations for their year. You check and change everything.</p>
 
   <div class="card">
     <div class="field"><h3>Essay task <span class="hint">(optional)</span></h3>
-      <p class="hint" style="margin:-2px 0 8px">The question or title you set for the pupils. The marker checks that the essay actually answers it.</p>
+      <p class="hint" style="margin:-2px 0 8px">The question or title you set for the pupils. The marker checks that the writing actually answers it.</p>
       <input id="mQ" class="select" maxlength="300" placeholder="For example: Was Boudica a hero?"></div>
-    <div class="field"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Pupil's essay</h3><button class="btn ghost small" id="mSample" type="button">Try a sample essay</button></div>
-      <p class="hint" style="margin:6px 0 8px">Remove the pupil's name and any personal details before pasting.</p>
-      <textarea id="mEssay" rows="10" maxlength="12000" placeholder="Paste the essay here"></textarea>
+    <div class="field">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Pupil's writing</h3>
+        <span style="display:flex;gap:8px;flex-wrap:wrap"><label class="btn ghost small" id="mPhotoBtn" for="mPhoto">Upload a photo</label><input type="file" id="mPhoto" accept="image/*" capture="environment" class="hidden"><button class="btn ghost small" id="mSample" type="button">Try a sample</button></span></div>
+      <p class="hint" style="margin:6px 0 8px">Remove the pupil's name and personal details first. A photo of handwriting is turned into text you can check and correct.</p>
+      <textarea id="mEssay" rows="10" maxlength="12000" placeholder="Paste the writing here, or upload a photo"></textarea>
       <div class="hint" id="mCount" style="text-align:right;margin-top:4px">0 words</div></div>
   </div>
 
@@ -349,11 +372,18 @@
       <div><h3>Key stage</h3><div class="chips" id="mKs"></div></div>
       <div id="mYearF" class="hidden right"><h3>Year</h3><div class="chips" id="mYear"></div></div>
     </div>
-    <div class="ctx-row one"><div><h3>Subject</h3><div class="chips" id="mSubj"></div></div></div>
+    <div id="mFw" class="hidden"></div>
   </div>
 
-  <div class="actions" style="margin-bottom:16px"><span class="hint" id="mHint">Choose a key stage, year and subject.</span><button class="btn accent" id="mGo" disabled>Mark this essay</button></div>
-  <div id="mLoading" class="card loading hidden"><div class="spinner"></div><h2>Reading the essay</h2><p class="hint">Checking it against the rubric and the curriculum. This usually takes 10 to 20 seconds.</p></div>
+  <div class="card">
+    <h3>Feedback approach</h3>
+    <p class="hint" style="margin:-4px 0 12px">Changes the tone of the comments. Scores stay fair either way.</p>
+    <div class="approach" id="mApproach"></div>
+  </div>
+
+  <div class="actions" style="margin-bottom:16px"><span class="hint" id="mHint">Choose a key stage and year.</span><button class="btn accent" id="mGo" disabled>Mark this writing</button></div>
+
+  <div id="mLoading" class="card loading hidden"><div class="spinner"></div><h2>Reading the writing</h2><p class="hint">Checking it against the year's expectations. This usually takes 10 to 20 seconds.</p></div>
   <div id="mErr" class="err hidden"></div>
 
   <div id="mOut" class="hidden">
@@ -361,10 +391,9 @@
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><h3 style="margin:0">Suggested scores</h3><span class="total" id="mTotal"></span></div>
       <div class="crit-grid" id="mCrit"></div>
-      <div id="mSrc"></div>
     </div>
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Feedback on the essay</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Feedback on the writing</h3>
         <span class="hint"><span class="key s"></span>What works <span class="key i" style="margin-left:10px"></span>To improve</span></div>
       <p class="hint" style="margin:6px 0 12px">Click a highlighted part to see the comment.</p>
       <div class="essay" id="mText"></div>
@@ -910,10 +939,15 @@ $("cSend").onclick = () => { if (chat.busy) { if (chat.ctrl) chat.ctrl.abort(); 
 $("cNew").onclick = () => { chat.messages = []; renderChatMeta(); renderLog(); };
 
 // ================= ESSAY MARKER =================
-const MSUBJECTS = ["English", "History", "Geography", "Science", "Citizenship"];
-const mk = { ks: null, year: null, subject: null, result: null, busy: false };
+let WRITING = null;
+const APPROACHES = [
+  { id: "strict", t: "Strict", d: "Direct and precise. Names every important error." },
+  { id: "balanced", t: "Balanced", d: "Fair and even. Strengths and next steps in equal measure." },
+  { id: "encouraging", t: "Encouraging", d: "Warm and growth focused. Strengths first, few next steps." },
+];
+const mk = { ks: null, year: null, approach: "balanced", result: null, busy: false };
 const SAMPLE = {
-  ks: "KS2", year: 6, subject: "History", question: "Was Boudica a hero?",
+  ks: "KS2", year: 6, task: "Was Boudica a hero?",
   essay: `Boudica was the queen of the Iceni tribe who lived in East Anglia. When her husband Prasutagus died in AD 60, the Romans took the Iceni land and treated Boudica and her daughters very badly.
 
 Boudica was angry so she gathered a huge army. They attacked Colchester first and then burned London and St Albans. Some historians say thousands of people died. The Roman governor Suetonius Paulinus came back from Wales and finally defeated her army in a big battle.
@@ -924,32 +958,76 @@ In conclusion I belive Boudica was mostly a hero because she fought for her peop
 };
 
 function mWords() { return $("mEssay").value.trim().split(/\s+/).filter(Boolean).length; }
+function renderFramework() {
+  const box = $("mFw");
+  const fw = WRITING && mk.year ? WRITING.years[mk.year] : null;
+  box.classList.toggle("hidden", !fw); box.innerHTML = "";
+  if (!fw) return;
+  const d = el("details", { class: "fw" }, el("summary", {}, `Writing expectations for ${fw.ks === "KS3" ? "Key Stage 3 (Years 7 to 9)" : "Year " + mk.year}`));
+  [["Composition", fw.composition], ["Grammar", fw.grammar], ["Punctuation and spelling", fw.punctuationSpelling]].forEach(([h, items]) => {
+    if (!items.length) return;
+    const ul = el("ul"); items.forEach((x) => ul.append(el("li", {}, x)));
+    d.append(el("h4", {}, h), ul);
+  });
+  d.append(el("p", { class: "hint", style: "margin:10px 0 0" }, "Source: ", el("a", { href: WRITING.source.pdf, target: "_blank", rel: "noopener", style: "color:var(--accent)" }, "DfE, The national curriculum in England: English programmes of study and English Appendix 2 (2014)")));
+  box.append(d);
+}
 function renderMarkCtx() {
   const ks = $("mKs"); ks.innerHTML = "";
   CUR.keyStages.forEach((k) => ks.append(chip(k.id.replace("KS", "Key Stage "), mk.ks === k.id, () => { mk.ks = k.id; mk.year = null; renderMarkCtx(); })));
   $("mYearF").classList.toggle("hidden", !mk.ks);
   if (mk.ks) { const y = $("mYear"); y.innerHTML = ""; YEARS[mk.ks].forEach((n) => y.append(chip("Year " + n, mk.year === n, () => { mk.year = n; renderMarkCtx(); }))); }
-  const s = $("mSubj"); s.innerHTML = "";
-  MSUBJECTS.filter((n) => !mk.ks || CUR.keyStages.find((k) => k.id === mk.ks).subjects.some((x) => x.name === n))
-    .forEach((n) => s.append(chip(n, mk.subject === n, () => { mk.subject = n; renderMarkCtx(); })));
-  if (mk.subject && mk.ks && !CUR.keyStages.find((k) => k.id === mk.ks).subjects.some((x) => x.name === mk.subject)) mk.subject = null;
+  renderFramework();
+  const a = $("mApproach"); a.innerHTML = "";
+  APPROACHES.forEach((x) => a.append(el("button", { class: "appr" + (mk.approach === x.id ? " on" : ""), "data-a": x.id, type: "button", onclick: () => { mk.approach = x.id; renderMarkCtx(); } },
+    el("div", { class: "bar" }), el("div", { class: "t" }, x.t), el("div", { class: "d" }, x.d))));
   const w = mWords();
   $("mCount").textContent = w + (w === 1 ? " word" : " words");
-  const ready = mk.ks && mk.year && mk.subject && w >= 40;
+  const ready = mk.ks && mk.year && w >= 30;
   $("mGo").disabled = !ready || mk.busy;
-  $("mHint").textContent = !(mk.ks && mk.year && mk.subject) ? "Choose a key stage, year and subject." : w < 40 ? "Paste an essay of at least 40 words." : "Ready to mark.";
+  $("mHint").textContent = !(mk.ks && mk.year) ? "Choose a key stage and year." : w < 30 ? "Add a piece of writing of at least 30 words." : "Ready to mark.";
 }
 $("mEssay").addEventListener("input", renderMarkCtx);
-$("mSample").onclick = () => { Object.assign(mk, { ks: SAMPLE.ks, year: SAMPLE.year, subject: SAMPLE.subject }); $("mQ").value = SAMPLE.question; $("mEssay").value = SAMPLE.essay; renderMarkCtx(); };
+$("mSample").onclick = () => { Object.assign(mk, { ks: SAMPLE.ks, year: SAMPLE.year }); $("mQ").value = SAMPLE.task; $("mEssay").value = SAMPLE.essay; renderMarkCtx(); };
 
 function mErr(msg) { $("mErr").textContent = msg; $("mErr").classList.toggle("hidden", !msg); }
+
+function shrinkImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(); const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const max = 1800, s = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      resolve(c.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => reject(new Error("This file could not be opened as an image."));
+    img.src = url;
+  });
+}
+$("mPhoto").addEventListener("change", async (e) => {
+  const f = e.target.files && e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  mErr(""); const btn = $("mPhotoBtn"); btn.textContent = "Reading photo..."; btn.style.pointerEvents = "none";
+  try {
+    const image = await shrinkImage(f);
+    const r = await fetch("/api/ocr", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ image }) });
+    let data; try { data = await r.json(); } catch { throw new Error("The server did not answer. Please try again."); }
+    if (!r.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+    const cur = $("mEssay").value.trim();
+    $("mEssay").value = cur ? cur + "\n\n" + data.text : data.text;
+    renderMarkCtx();
+    $("mEssay").focus();
+  } catch (err) { mErr(err.message); $("mErr").scrollIntoView({ behavior: "smooth", block: "center" }); }
+  btn.textContent = "Upload a photo"; btn.style.pointerEvents = "";
+});
 
 async function markEssay() {
   mErr(""); mk.busy = true; renderMarkCtx();
   $("mOut").classList.add("hidden"); $("mLoading").classList.remove("hidden");
   $("mLoading").scrollIntoView({ behavior: "smooth", block: "center" });
   try {
-    const r = await fetch("/api/mark", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ks: mk.ks, year: mk.year, subject: mk.subject, question: $("mQ").value, essay: $("mEssay").value }) });
+    const r = await fetch("/api/mark", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ks: mk.ks, year: mk.year, approach: mk.approach, task: $("mQ").value, essay: $("mEssay").value }) });
     let data; try { data = await r.json(); } catch { throw new Error("The server did not answer. Please try again."); }
     if (!r.ok) throw new Error(data.error || "Something went wrong. Please try again.");
     mk.result = data; mk.essay = $("mEssay").value.replace(/\r\n/g, "\n").trim();
@@ -976,17 +1054,11 @@ function renderMarkOut() {
     const paint = () => { val.textContent = c.score + "/5"; dots.innerHTML = ""; for (let i = 1; i <= 5; i++) dots.append(el("i", { class: i <= c.score ? "on" : "" })); renderMarkTotal(); };
     const minus = el("button", { type: "button", title: "Lower", onclick: () => { c.score = Math.max(0, c.score - 1); paint(); } }, "−");
     const plus = el("button", { type: "button", title: "Raise", onclick: () => { c.score = Math.min(5, c.score + 1); paint(); } }, "+");
-    g.append(el("div", { class: "crit" }, el("div", { class: "crit-h" }, el("b", {}, c.name), el("div", { class: "score" }, minus, val, plus)), dots, el("p", {}, c.reason)));
+    const checks = el("ul", { class: "checks" });
+    c.checks.forEach((k) => checks.append(el("li", { class: k.met ? "ok" : "no" }, el("b", {}, k.met ? "✓" : "✗"), el("span", {}, k.text))));
+    g.append(el("div", { class: "crit" }, el("div", { class: "crit-h" }, el("b", {}, c.name), el("div", { class: "score" }, minus, val, plus)), dots, el("p", {}, c.reason), c.checks.length ? checks : null));
     paint();
   });
-  const src = $("mSrc"); src.innerHTML = "";
-  if (R.sources.length) {
-    const s = el("details", { class: "src", style: "margin-top:12px" }, el("summary", {}, "From the National Curriculum"));
-    R.sources.forEach((q) => s.append(el("q", {}, q.text[0].toUpperCase() + q.text.slice(1)), el("div", { class: "t" }, q.topic)));
-    s.append(el("a", { href: CUR.source.pdf, target: "_blank", rel: "noopener" }, "DfE, The national curriculum in England (2014)"));
-    src.append(s);
-  }
-  // essay with highlights (in order of appearance, no overlaps)
   const text = mk.essay;
   const spans = [];
   R.highlights.forEach((h) => { const i = text.indexOf(h.quote); if (i >= 0 && !spans.some((s) => i < s.end && i + h.quote.length > s.start)) spans.push({ start: i, end: i + h.quote.length, h }); });
@@ -1021,8 +1093,8 @@ function showView() {
 }
 window.addEventListener("hashchange", showView);
 
-fetch("curriculum.json").then((r) => r.json()).then((d) => {
-  CUR = d;
+Promise.all([fetch("curriculum.json").then((r) => r.json()), fetch("writing.json").then((r) => r.json())]).then(([d, w]) => {
+  CUR = d; WRITING = w;
   $("srcTop").href = d.source.url; $("srcFoot").href = d.source.pdf;
   renderS1(); setStep(1); renderChatCtx(); renderMarkCtx(); showView();
 }).catch(() => showErr("The curriculum could not load. Please refresh the page."));
