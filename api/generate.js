@@ -1,6 +1,6 @@
 // Vercel serverless function: builds a grounded lesson plan with Google Gemini.
 // The API key lives only in the GEMINI_API_KEY environment variable on Vercel.
-const curriculum = require("../data/curriculum.json");
+const curriculum = require("../curriculum.json");
 
 const STAGES = ["Warm up", "Teach", "Try together", "Try alone", "Check and close"];
 const LENGTHS = [30, 45, 60, 90];
