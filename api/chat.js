@@ -57,8 +57,8 @@ function grounding(ctx) {
 }
 
 function buildPrompt(ctx, g, messages) {
-  const convo = messages.map((m) => `${m.role === "teacher" ? "Teacher" : "Madlen"}: ${m.text}`).join("\n\n");
-  return `You are Madlen, an expert teaching assistant for teachers in England. You help with the National Curriculum, topics, lesson ideas, activities, misconceptions, questioning, assessment, differentiation and classroom practice.
+  const convo = messages.map((m) => `${m.role === "teacher" ? "Teacher" : "Assistant"}: ${m.text}`).join("\n\n");
+  return `You are a friendly, expert teaching assistant for teachers in England, built into the Madlen platform. Do not give yourself a name. You help with the National Curriculum, topics, lesson ideas, activities, misconceptions, questioning, assessment, differentiation and classroom practice.
 
 CONTEXT CHOSEN BY THE TEACHER
 - Key stage: ${g.ks.id} (pupils aged ${KS_AGES[g.ks.id]})

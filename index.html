@@ -280,7 +280,7 @@
 
  <div id="view-chat" class="hidden">
   <p class="label">Teacher Chatbot</p>
-  <h1>Ask Madlen</h1>
+  <h1>Your teaching sidekick</h1>
   <p class="sub">Questions about a topic, the curriculum or a lesson idea. Answers are pitched to the year you teach.</p>
 
   <div class="chat card">
@@ -751,7 +751,7 @@ function md(text) {
 const MASCOT = "mascot.webp";
 function botMsg(html, extra) {
   const b = el("div", { class: "bubble" }); b.innerHTML = html; if (extra) b.append(extra);
-  return el("div", { class: "msg bot" }, el("img", { class: "ava", src: MASCOT, alt: "Madlen" }), b);
+  return el("div", { class: "msg bot" }, el("img", { class: "ava", src: MASCOT, alt: "Assistant" }), b);
 }
 function starters() {
   const t = chatTopic();
@@ -765,7 +765,7 @@ function starters() {
 function renderLog() {
   const log = $("cLog"); log.innerHTML = "";
   if (!chat.messages.length) {
-    const hello = el("div", { class: "hello" }, el("img", { src: MASCOT, alt: "Madlen" }), el("h2", {}, "Hi, I'm Madlen!"));
+    const hello = el("div", { class: "hello" }, el("img", { src: MASCOT, alt: "" }), el("h2", {}, "Hi! What are we teaching today?"));
     if (chat.ks && chat.year) {
       hello.append(el("p", { class: "hint" }, `Ask me anything about teaching ${ctxLabel()}.`));
       const st = el("div", { class: "starters" });
