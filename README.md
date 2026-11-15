@@ -1,4 +1,4 @@
-# Madlen Lesson Planner Lite
+# Madlen Teacher Toolkit
 
 A free lesson planner for Key Stages 1 to 3 in England. Teachers pick every option from the official curriculum, and the AI plans a five-stage lesson grounded in the selected statutory statements.
 

@@ -110,29 +110,38 @@ Return only JSON with this shape:
 {"name": "${st.name}", "minutes": ${st.minutes}, "activity": "2 to 4 sentences", "slideTitle": "slide title", "bullets": ["2 to 4 slide bullets"], "visual": "image or diagram idea"}`;
 }
 
+const RETRY = new Set([404, 429, 500, 502, 503, 504]);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 async function callGemini(prompt) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY is not set on the server.");
-  const models = [process.env.GEMINI_MODEL, "gemini-2.5-flash", "gemini-flash-latest"].filter(Boolean);
-  let lastErr;
-  for (const model of models) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-    const r = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
-      }),
-    });
-    if (r.status === 404) { lastErr = new Error(`Model ${model} not found`); continue; }
-    const data = await r.json();
-    if (!r.ok) throw new Error(data?.error?.message || `Gemini error ${r.status}`);
-    const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
-    const clean = text.replace(/^```(json)?/i, "").replace(/```$/, "").trim();
-    return JSON.parse(clean);
+  const models = [...new Set([process.env.GEMINI_MODEL, "gemini-flash-latest", "gemini-2.5-flash", "gemini-flash-lite-latest", "gemini-2.5-flash-lite"].filter(Boolean))];
+  let lastMsg = "";
+  for (let round = 0; round < 2; round++) {
+    for (const model of models) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+      let r, data;
+      try {
+        r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
+          }),
+        });
+        data = await r.json();
+      } catch (e) { lastMsg = e.message; continue; }
+      if (RETRY.has(r.status)) { lastMsg = data?.error?.message || `Gemini error ${r.status}`; continue; }
+      if (!r.ok) throw new Error(data?.error?.message || `Gemini error ${r.status}`);
+      const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
+      const clean = text.replace(/^```(json)?/i, "").replace(/```$/, "").trim();
+      try { return JSON.parse(clean); } catch { lastMsg = "The AI answer was not complete."; continue; }
+    }
+    await sleep(2000);
   }
-  throw lastErr || new Error("No Gemini model available");
+  throw new Error("The AI service is busy right now. Please try again in a minute. (" + lastMsg + ")");
 }
 
 const noDash = (v) => (typeof v === "string" ? v.replace(/\s*[—–]\s*/g, ", ") : v);
@@ -209,3 +218,5 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: e.message || "Something went wrong" });
   }
 };
+
+module.exports.config = { maxDuration: 60 };
