@@ -57,9 +57,10 @@ ${APPROACH[approach]}
 
 RULES
 - Mark against Year ${year} expectations, never against an older or younger year.
-- For each criterion, list 2 to 5 checks: the IDs of the expectations above that matter most for this piece, with "met": true if the writing shows it and false if it should but does not.
+- For each criterion, list 2 to 5 checks: the IDs of the expectations above that matter most for this piece, with "met": true only if there is clear evidence in the writing (more than one example for anything described as "a range" or "a wider range"), and false if the writing should show it but does not.
+- Read the writing line by line for errors against this year's expectations and everything introduced in earlier years (for example capital letters, full stops, commas after fronted adverbials or before conjunctions where needed, apostrophes for possession and contraction, tense, spelling). Every clear error type must be either highlighted or named in a reason.
 - If the writing does not answer the task or is about something else, set "onTopic" to false and explain in "offTopicNote".
-- Highlights: 3 to 6 short passages copied EXACTLY, character for character, from the writing (5 to 25 words each). Type "strength" or "improve". Each comment speaks to the pupil ("You...") in words a Year ${year} pupil understands; for "improve" give a concrete better version.
+- Highlights: 4 to 7 short passages copied EXACTLY, character for character, from the writing (5 to 25 words each). Type "strength" or "improve". If the writing has errors, include at least 2 "improve" highlights, each on a different error. Each comment speaks to the pupil ("You...") in words a Year ${year} pupil understands; for "improve" give a concrete better version.
 - "reason" for each score is for the teacher: one or two plain sentences pointing to the writing.
 - "summary": 2 or 3 sentences to the pupil, in words a Year ${year} pupil understands: strengths and one clear next step.
 - British English. Never use em dashes or en dashes.
