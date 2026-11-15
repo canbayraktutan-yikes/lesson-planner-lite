@@ -116,6 +116,18 @@
   .modal pre{white-space:pre-wrap;background:var(--peach);border-radius:10px;padding:12px;font-family:var(--sans);font-size:13.5px;max-height:320px;overflow:auto}
   .modal ol{padding-left:18px;color:var(--muted);font-size:14px}
   .modal a.btn{text-decoration:none;display:inline-block}
+  .ctx{padding:16px 20px}
+  .ctx h3{font-size:15px;margin:0 0 6px}
+  .ctx-row{display:grid;grid-template-columns:auto 1fr;gap:28px;margin-bottom:14px}
+  .ctx-row.one{grid-template-columns:1fr}
+  .ctx-row:last-child{margin-bottom:0}
+  .ctx .chip{padding:6px 12px;font-size:14px}
+  @media(max-width:760px){.ctx-row{grid-template-columns:1fr;gap:12px}}
+  .src{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13.5px}
+  .src .k{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:4px}
+  .src q{display:block;margin:4px 0;color:var(--ink)}
+  .src .t{color:var(--muted);font-size:12.5px}
+  .src a{color:var(--accent);font-size:12.5px}
   .select{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
   .chat{padding:0;overflow:hidden}
   .chat-top{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);gap:10px}
@@ -265,16 +277,6 @@
   <h1>Ask Madlen</h1>
   <p class="sub">Questions about a topic, the curriculum or a lesson idea. Answers are pitched to the year you teach.</p>
 
-  <div class="card">
-    <div class="field"><h3>Key stage</h3><div class="chips" id="cKs"></div></div>
-    <div class="field hidden" id="cYearF"><h3>Year</h3><div class="chips" id="cYear"></div></div>
-    <div class="field hidden" id="cSubjF"><h3>Subject <span class="hint">(optional)</span></h3><div class="chips" id="cSubj"></div></div>
-    <div class="field hidden" id="cTopicF"><h3>Topic <span class="hint">(optional)</span></h3>
-      <select id="cTopic" class="select"></select>
-      <p class="hint" style="margin:8px 0 0">Pick a topic and Madlen answers from its official curriculum statements.</p>
-    </div>
-  </div>
-
   <div class="chat card">
     <div class="chat-top"><span class="hint" id="cCtx">Choose a key stage and year to start.</span><button class="btn ghost small hidden" id="cNew" type="button">New chat</button></div>
     <div id="cLog" class="chat-log"></div>
@@ -282,6 +284,14 @@
       <textarea id="cInput" rows="1" maxlength="1500" placeholder="Choose a key stage and year first" disabled></textarea>
       <button class="btn accent" id="cSend" type="button" disabled>Send</button>
     </div>
+  </div>
+  <div class="card ctx">
+    <div class="ctx-row">
+      <div><h3>Key stage</h3><div class="chips" id="cKs"></div></div>
+      <div id="cYearF" class="hidden"><h3>Year</h3><div class="chips" id="cYear"></div></div>
+    </div>
+    <div class="ctx-row one hidden" id="cSubjF"><div><h3>Subject <span class="hint">(optional)</span></h3><div class="chips" id="cSubj"></div></div></div>
+    <div class="ctx-row one hidden" id="cTopicF"><div><h3>Topic <span class="hint">(optional, answers use its official curriculum statements)</span></h3><select id="cTopic" class="select"></select></div></div>
   </div>
  </div>
 </main>
@@ -760,9 +770,18 @@ function renderLog() {
   chat.messages.forEach((m) => {
     if (m.role === "teacher") log.append(el("div", { class: "msg me" }, el("div", { class: "bubble" }, m.text)));
     else {
-      let extra = null;
-      if (m.offer) extra = el("div", { class: "offer" }, el("button", { class: "btn small accent", type: "button", onclick: () => planFromChat(m.offer) }, "Plan this lesson"));
-      log.append(botMsg(md(m.text), extra));
+      let html = m.answer ? md(m.answer) : "";
+      if (m.points && m.points.length) html += "<ul>" + m.points.map((x) => "<li>" + md(x).replace(/^<p>|<\/p>$/g, "") + "</li>").join("") + "</ul>";
+      if (!html) html = md(m.text || "");
+      const extra = el("div");
+      if (m.sources && m.sources.length) {
+        const s = el("div", { class: "src" }, el("div", { class: "k" }, "From the National Curriculum"));
+        m.sources.forEach((q) => s.append(el("q", {}, q.text[0].toUpperCase() + q.text.slice(1)), el("div", { class: "t" }, q.topic)));
+        s.append(el("a", { href: CUR.source.pdf, target: "_blank", rel: "noopener" }, "DfE, The national curriculum in England (2014)"));
+        extra.append(s);
+      }
+      if (m.offer) extra.append(el("div", { class: "offer" }, el("button", { class: "btn small accent", type: "button", onclick: () => planFromChat(m.offer) }, "Plan this lesson")));
+      log.append(botMsg(html, extra));
     }
   });
   if (chat.busy) log.append(botMsg('<span class="typing"><span></span><span></span><span></span></span>'));
@@ -782,7 +801,7 @@ async function send(text) {
     const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ context: ctx, messages: chat.messages.map((m) => ({ role: m.role, text: m.text })) }) });
     let data; try { data = await r.json(); } catch { throw new Error("The server did not answer. Please try again."); }
     if (!r.ok) throw new Error(data.error || "Something went wrong. Please try again.");
-    chat.messages.push({ role: "assistant", text: data.reply, offer: data.offerLessonPlan && t ? { ks: chat.ks, subject: chat.subject, section: t.section, topic: t.topic.title } : null });
+    chat.messages.push({ role: "assistant", answer: data.answer, points: data.points, sources: data.sources, text: [data.answer, ...(data.points || []).map((x) => "- " + x)].join("\n"), offer: data.offerLessonPlan && t ? { ks: chat.ks, subject: chat.subject, section: t.section, topic: t.topic.title } : null });
   } catch (e) {
     chat.messages.push({ role: "assistant", text: "Sorry, I couldn't answer just now. " + e.message });
   }

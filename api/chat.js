@@ -29,50 +29,71 @@ function grounding(ctx) {
   if (!ks) return { error: "Invalid key stage" };
   const year = Number(ctx.year);
   if (!YEARS[ks.id].includes(year)) return { error: "Invalid year" };
-  if (!ctx.subject) return { ks, year, text: "" };
+  if (!ctx.subject) return { ks, year, pool: [], text: "" };
   const subject = ks.subjects.find((s) => s.name === ctx.subject);
   if (!subject) return { error: "Invalid subject" };
   const sections = subject.sections.filter((s) => sectionMatchesYear(s.title, year));
+  const pool = [];
+  const add = (t) => t.statements.forEach((s) => pool.push({ topic: t.title, text: s.text, details: s.details }));
+  const fmt = () => pool.map((s) => `- [${s.topic}] ${s.text}${s.details.length ? ": " + s.details.join("; ") : ""}`).join("\n");
   if (ctx.topic) {
     for (const sec of sections) {
       const t = sec.topics.find((x) => x.title === ctx.topic && (sec.title || null) === (ctx.section || null));
       if (t) {
-        const lines = t.statements.map((s) => `- ${s.text}${s.details.length ? ": " + s.details.join("; ") : ""}`);
-        const ex = t.examples && t.examples.length ? `\nNon-statutory examples listed in the curriculum: ${t.examples.join("; ")}` : "";
-        return { ks, year, subject, topic: t, text: `Selected topic: ${t.title}${sec.title ? ` (${sec.title})` : ""}\nStatutory curriculum statements for this topic:\n${lines.join("\n")}${ex}` };
+        add(t);
+        const ex = t.examples && t.examples.length ? `\nNon-statutory examples listed for this topic (suggestions, not requirements): ${t.examples.join("; ")}` : "";
+        return { ks, year, subject, topic: t, pool, text: `Selected topic: ${t.title}\nStatutory statements:\n${fmt()}${ex}` };
       }
     }
     return { error: "Invalid topic" };
   }
-  const list = sections.map((sec) => `${sec.title ? sec.title + ": " : ""}${sec.topics.map((t) => t.title).join("; ")}`).join("\n");
-  return { ks, year, subject, text: `Topics in the ${subject.name} curriculum for this year:\n${list}` };
+  sections.forEach((sec) => sec.topics.forEach(add));
+  return { ks, year, subject, pool, text: `All statutory ${subject.name} statements for this year, with their topic in brackets:\n${fmt()}` };
 }
 
 function buildPrompt(ctx, g, messages) {
-  const convo = messages.map((m) => `${m.role === "teacher" ? "Teacher" : "Assistant"}: ${m.text}`).join("\n\n");
-  return `You are Madlen, a friendly and knowledgeable teaching assistant for teachers in England. You help with questions about the National Curriculum, topics, lesson ideas, activities, misconceptions, questioning, differentiation and classroom practice.
+  const convo = messages.map((m) => `${m.role === "teacher" ? "Teacher" : "Madlen"}: ${m.text}`).join("\n\n");
+  return `You are Madlen, an expert teaching assistant for teachers in England. You help with the National Curriculum, topics, lesson ideas, activities, misconceptions, questioning, assessment, differentiation and classroom practice.
 
 CONTEXT CHOSEN BY THE TEACHER
 - Key stage: ${g.ks.id} (pupils aged ${KS_AGES[g.ks.id]})
 - Year: Year ${g.year} (pupils aged ${YEAR_AGES[g.year]})
-${g.subject ? `- Subject: ${g.subject.name}\n` : ""}${g.text ? `\nCURRICULUM (quoted from The national curriculum in England, DfE 2014):\n${g.text}\n` : ""}
+${g.subject ? `- Subject: ${g.subject.name}\n` : "- Subject: not chosen\n"}${g.text ? `\nNATIONAL CURRICULUM (The national curriculum in England, DfE 2014):\n${g.text}\n` : "\nNo subject is chosen, so you have no curriculum text. Do not quote or describe the curriculum; if asked, suggest the teacher picks a subject.\n"}
 HOW TO ANSWER
-- Pitch every idea, activity and example to pupils in Year ${g.year}. ${PUPIL_LANGUAGE[g.ks.id]}
-- Offer drafts and suggestions, never instructions. Use phrases like "You could...", "One option is...", "If it suits your class...". The teacher decides what goes into the lesson.
-- Be concise and practical: a short answer first, then up to 5 bullet points if useful. No long essays.
-- Ground curriculum claims in the curriculum text above. When you use it, say "The National Curriculum says..." and quote the statement. Never invent curriculum statements, exam board content or statistics. If the teacher asks about GCSE, A level or exam board specifications (AQA, Edexcel, OCR), say kindly that you cover Key Stages 1 to 3 of the National Curriculum and cannot quote exam board specifications.
-- If a question has nothing to do with teaching or education, reply briefly and kindly that you are here to help with teaching, and suggest one thing you can help with.
-- Use British English. Never use em dashes or en dashes.
-- Formatting: plain text, "- " for bullets, **bold** for at most a few key words. No headings, no tables.
+- Answer the teacher's actual question directly in the first sentence. No filler, no praise, no "great question", no "it is lots of fun".
+- Be specific to Year ${g.year}${g.subject ? ` ${g.subject.name}` : ""}: name the exact skills, facts, numbers, texts or examples a Year ${g.year} teacher would use. Generic advice that fits any year is not good enough.
+- ${PUPIL_LANGUAGE[g.ks.id]}
+- Offer suggestions, not instructions: "You could...", "One option is...". The teacher decides.
+- If a question is vague, give your best useful answer and end the answer with one short question to narrow it down.
+- Curriculum claims: only use the curriculum text above. Never invent or paraphrase curriculum requirements. Copy the exact statements you rely on into "quotes" (word for word, without the topic in brackets). Do not write "the National Curriculum says" in the answer; the quotes are shown separately with the source.
+- If asked about GCSE, A level or exam board specifications (AQA, Edexcel, OCR), say you cover Key Stages 1 to 3 of the National Curriculum only.
+- If the question is not about teaching or education, say kindly in one sentence that you help with teaching, and suggest one thing you can help with.
+- British English. Never use em dashes or en dashes. No markdown headings or tables. You may use **bold** for up to 3 key words.
 
 OFFER A LESSON PLAN
-Set "offerLessonPlan" to true only when the teacher's latest message is about planning, teaching or building a lesson on the selected topic${g.topic ? ` ("${g.topic.title}")` : ""}. Otherwise set it to false.${g.topic ? "" : " No topic is selected, so it must be false."}
+"offerLessonPlan" is true only when the teacher's latest message asks to plan, teach or build a lesson on the selected topic${g.topic ? ` ("${g.topic.title}")` : ""}. Otherwise false.${g.topic ? "" : " No topic is selected, so it must be false."}
 
 CONVERSATION SO FAR
 ${convo}
 
-Reply to the teacher's latest message. Return only JSON: {"reply": "your answer", "offerLessonPlan": false}`;
+Reply to the teacher's latest message. Return only JSON:
+{"answer": "1 to 3 sentences that directly answer", "points": ["0 to 5 short, concrete suggestions or facts"], "quotes": ["0 to 3 exact curriculum statements you relied on"], "offerLessonPlan": false}`;
 }
+
+const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+function verifyQuotes(quotes, pool) {
+  const out = [];
+  (Array.isArray(quotes) ? quotes : []).forEach((q) => {
+    const nq = norm(q).replace(/^\s*\[[^\]]*\]\s*/, "");
+    if (nq.length < 15) return;
+    const hit = pool.find((s) => { const ns = norm(s.text); return ns === nq || ns.includes(nq) || (nq.includes(ns) && ns.length > 25); });
+    if (hit && !out.some((o) => o.text === hit.text)) out.push({ topic: hit.topic, text: hit.text });
+  });
+  return out.slice(0, 3);
+}
+
+const clean = (v) => String(v || "").replace(/\s*[\u2014\u2013]\s*/g, ", ").trim();
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).json({ error: "Use POST" });
@@ -86,10 +107,12 @@ module.exports = async (req, res) => {
       .slice(-12)
       .map((m) => ({ role: m.role, text: m.text.slice(0, 2000) }));
     if (!messages.length || messages[messages.length - 1].role !== "teacher") return res.status(400).json({ error: "Ask a question first" });
-    const raw = await callGemini(buildPrompt(ctx, g, messages), { temperature: 0.6 });
-    const reply = String(raw?.reply || "").replace(/\s*[—–]\s*/g, ", ").trim();
-    if (!reply) throw new Error("The AI answer was empty. Please try again.");
-    return res.status(200).json({ reply, offerLessonPlan: Boolean(raw?.offerLessonPlan) && Boolean(g.topic) });
+    const raw = await callGemini(buildPrompt(ctx, g, messages), { temperature: 0.5 });
+    const answer = clean(raw?.answer || raw?.reply);
+    const points = (Array.isArray(raw?.points) ? raw.points : []).map(clean).filter(Boolean).slice(0, 6);
+    if (!answer && !points.length) throw new Error("The AI answer was empty. Please try again.");
+    const sources = verifyQuotes(raw?.quotes, g.pool || []);
+    return res.status(200).json({ answer, points, sources, offerLessonPlan: Boolean(raw?.offerLessonPlan) && Boolean(g.topic) });
   } catch (e) {
     return res.status(500).json({ error: e.message || "Something went wrong" });
   }
