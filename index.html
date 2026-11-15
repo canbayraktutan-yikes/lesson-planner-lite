@@ -334,6 +334,16 @@
   <h1>Mark an essay</h1>
   <p class="sub">Paste a pupil's essay and get suggested scores, comments on the text and a short summary. You check and change everything.</p>
 
+  <div class="card">
+    <div class="field"><h3>Essay task <span class="hint">(optional)</span></h3>
+      <p class="hint" style="margin:-2px 0 8px">The question or title you set for the pupils. The marker checks that the essay actually answers it.</p>
+      <input id="mQ" class="select" maxlength="300" placeholder="For example: Was Boudica a hero?"></div>
+    <div class="field"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Pupil's essay</h3><button class="btn ghost small" id="mSample" type="button">Try a sample essay</button></div>
+      <p class="hint" style="margin:6px 0 8px">Remove the pupil's name and any personal details before pasting.</p>
+      <textarea id="mEssay" rows="10" maxlength="12000" placeholder="Paste the essay here"></textarea>
+      <div class="hint" id="mCount" style="text-align:right;margin-top:4px">0 words</div></div>
+  </div>
+
   <div class="card ctx">
     <div class="ctx-row">
       <div><h3>Key stage</h3><div class="chips" id="mKs"></div></div>
@@ -342,16 +352,7 @@
     <div class="ctx-row one"><div><h3>Subject</h3><div class="chips" id="mSubj"></div></div></div>
   </div>
 
-  <div class="card">
-    <div class="field"><h3>Essay question <span class="hint">(optional)</span></h3>
-      <input id="mQ" class="select" maxlength="300" placeholder="For example: Was Boudica a hero?"></div>
-    <div class="field"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Pupil's essay</h3><button class="btn ghost small" id="mSample" type="button">Try a sample essay</button></div>
-      <p class="hint" style="margin:6px 0 8px">Remove the pupil's name and any personal details before pasting.</p>
-      <textarea id="mEssay" rows="10" maxlength="12000" placeholder="Paste the essay here"></textarea>
-      <div class="hint" id="mCount" style="text-align:right;margin-top:4px">0 words</div></div>
-    <div class="actions"><span class="hint" id="mHint">Choose a key stage, year and subject.</span><button class="btn accent" id="mGo" disabled>Mark this essay</button></div>
-  </div>
-
+  <div class="actions" style="margin-bottom:16px"><span class="hint" id="mHint">Choose a key stage, year and subject.</span><button class="btn accent" id="mGo" disabled>Mark this essay</button></div>
   <div id="mLoading" class="card loading hidden"><div class="spinner"></div><h2>Reading the essay</h2><p class="hint">Checking it against the rubric and the curriculum. This usually takes 10 to 20 seconds.</p></div>
   <div id="mErr" class="err hidden"></div>
 
