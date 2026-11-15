@@ -120,8 +120,33 @@
   .ctx h3{font-size:15px;margin:0 0 6px}
   .ctx-row{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px 28px;margin-bottom:14px}
   .ctx-row > div{min-width:0}
-  #cYearF{text-align:right}
-  #cYearF .chips{justify-content:flex-end}
+  #cYearF,.ctx .right{text-align:right}
+  #cYearF .chips,.ctx .right .chips{justify-content:flex-end}
+  .crit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:760px){.crit-grid{grid-template-columns:1fr}}
+  .crit{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .crit-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+  .crit-h b{font-family:Lora,Georgia,serif;font-size:15.5px}
+  .score{display:flex;align-items:center;gap:6px}
+  .score button{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font:inherit;line-height:1}
+  .score span{min-width:34px;text-align:center;font-weight:700;color:var(--accent)}
+  .dots{display:flex;gap:4px;margin:2px 0 8px}
+  .dots i{flex:1;height:6px;border-radius:3px;background:var(--line)}
+  .dots i.on{background:var(--accent)}
+  .crit p{margin:0;color:var(--muted);font-size:13.5px}
+  .essay{white-space:pre-wrap;line-height:1.8;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .hl{border-radius:4px;padding:1px 2px;cursor:pointer}
+  .hl.s{background:#DDF0E1;border-bottom:2px solid #3F7A4A}
+  .hl.i{background:#FCE3D6;border-bottom:2px solid var(--accent)}
+  .hl.active{outline:2px solid var(--ink)}
+  .hl sup{font-size:10px;font-weight:700;margin-left:2px;color:var(--ink)}
+  .key{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+  .key.s{background:#DDF0E1;border:1px solid #3F7A4A}.key.i{background:#FCE3D6;border:1px solid var(--accent)}
+  .comments{padding-left:22px;margin:14px 0 0}
+  .comments li{padding:8px 10px;border-radius:10px;margin-bottom:6px}
+  .comments li.active{background:var(--peach)}
+  .comments li .q{color:var(--muted);font-size:13px;font-style:italic}
+  .comments li .tag{margin-left:0;margin-right:6px}
   .ctx-row.one{display:block}
   .ctx-row:last-child{margin-bottom:0}
   .ctx .chip{padding:6px 12px;font-size:14px}
@@ -171,7 +196,7 @@
     <nav class="tabs">
       <a class="tab on" href="#planner" data-view="planner">Lesson Planner</a>
       <a class="tab" href="#chat" data-view="chat">Teacher Chatbot</a>
-      <span class="tab soon" title="Coming soon">Essay Marker</span>
+      <a class="tab" href="#marker" data-view="marker">Essay Marker</a>
     </nav>
   </div>
   <a class="src-link" id="srcTop" target="_blank" rel="noopener">Built on the National Curriculum in England</a>
@@ -301,6 +326,54 @@
     </div>
     <div class="ctx-row one hidden" id="cSubjF"><div><h3>Subject <span class="hint">(optional)</span></h3><div class="chips" id="cSubj"></div></div></div>
     <div class="ctx-row one hidden" id="cTopicF"><div><h3>Topic <span class="hint">(optional, answers use its official curriculum statements)</span></h3><select id="cTopic" class="select"></select></div></div>
+  </div>
+ </div>
+
+ <div id="view-marker" class="hidden">
+  <p class="label">Essay Marker</p>
+  <h1>Mark an essay</h1>
+  <p class="sub">Paste a pupil's essay and get suggested scores, comments on the text and a short summary. You check and change everything.</p>
+
+  <div class="card ctx">
+    <div class="ctx-row">
+      <div><h3>Key stage</h3><div class="chips" id="mKs"></div></div>
+      <div id="mYearF" class="hidden right"><h3>Year</h3><div class="chips" id="mYear"></div></div>
+    </div>
+    <div class="ctx-row one"><div><h3>Subject</h3><div class="chips" id="mSubj"></div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="field"><h3>Essay question <span class="hint">(optional)</span></h3>
+      <input id="mQ" class="select" maxlength="300" placeholder="For example: Was Boudica a hero?"></div>
+    <div class="field"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Pupil's essay</h3><button class="btn ghost small" id="mSample" type="button">Try a sample essay</button></div>
+      <p class="hint" style="margin:6px 0 8px">Remove the pupil's name and any personal details before pasting.</p>
+      <textarea id="mEssay" rows="10" maxlength="12000" placeholder="Paste the essay here"></textarea>
+      <div class="hint" id="mCount" style="text-align:right;margin-top:4px">0 words</div></div>
+    <div class="actions"><span class="hint" id="mHint">Choose a key stage, year and subject.</span><button class="btn accent" id="mGo" disabled>Mark this essay</button></div>
+  </div>
+
+  <div id="mLoading" class="card loading hidden"><div class="spinner"></div><h2>Reading the essay</h2><p class="hint">Checking it against the rubric and the curriculum. This usually takes 10 to 20 seconds.</p></div>
+  <div id="mErr" class="err hidden"></div>
+
+  <div id="mOut" class="hidden">
+    <div id="mOff" class="err hidden"></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><h3 style="margin:0">Suggested scores</h3><span class="total" id="mTotal"></span></div>
+      <div class="crit-grid" id="mCrit"></div>
+      <div id="mSrc"></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Feedback on the essay</h3>
+        <span class="hint"><span class="key s"></span>What works <span class="key i" style="margin-left:10px"></span>To improve</span></div>
+      <p class="hint" style="margin:6px 0 12px">Click a highlighted part to see the comment.</p>
+      <div class="essay" id="mText"></div>
+      <ol class="comments" id="mComments"></ol>
+    </div>
+    <div class="card">
+      <h3>Summary for the pupil</h3>
+      <textarea id="mSummary" rows="3"></textarea>
+      <div class="actions"><span class="hint">Edit it, then copy it into your feedback.</span><button class="btn small" id="mCopy" type="button">Copy</button></div>
+    </div>
   </div>
  </div>
 </main>
@@ -835,11 +908,112 @@ $("cInput").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shi
 $("cSend").onclick = () => { if (chat.busy) { if (chat.ctrl) chat.ctrl.abort(); } else send(); };
 $("cNew").onclick = () => { chat.messages = []; renderChatMeta(); renderLog(); };
 
+// ================= ESSAY MARKER =================
+const MSUBJECTS = ["English", "History", "Geography", "Science", "Citizenship"];
+const mk = { ks: null, year: null, subject: null, result: null, busy: false };
+const SAMPLE = {
+  ks: "KS2", year: 6, subject: "History", question: "Was Boudica a hero?",
+  essay: `Boudica was the queen of the Iceni tribe who lived in East Anglia. When her husband Prasutagus died in AD 60, the Romans took the Iceni land and treated Boudica and her daughters very badly.
+
+Boudica was angry so she gathered a huge army. They attacked Colchester first and then burned London and St Albans. Some historians say thousands of people died. The Roman governor Suetonius Paulinus came back from Wales and finally defeated her army in a big battle.
+
+I think Boudica was a hero because she was brave and she stood up for her people when the Romans were being unfair. She was a woman leading an army which was very unusual at that time. On the other hand her army killed lots of ordinary people who had done nothing wrong, so some people might say she was not a hero.
+
+In conclusion I belive Boudica was mostly a hero because she fought for her peoples freedom even though she lost.`,
+};
+
+function mWords() { return $("mEssay").value.trim().split(/\s+/).filter(Boolean).length; }
+function renderMarkCtx() {
+  const ks = $("mKs"); ks.innerHTML = "";
+  CUR.keyStages.forEach((k) => ks.append(chip(k.id.replace("KS", "Key Stage "), mk.ks === k.id, () => { mk.ks = k.id; mk.year = null; renderMarkCtx(); })));
+  $("mYearF").classList.toggle("hidden", !mk.ks);
+  if (mk.ks) { const y = $("mYear"); y.innerHTML = ""; YEARS[mk.ks].forEach((n) => y.append(chip("Year " + n, mk.year === n, () => { mk.year = n; renderMarkCtx(); }))); }
+  const s = $("mSubj"); s.innerHTML = "";
+  MSUBJECTS.filter((n) => !mk.ks || CUR.keyStages.find((k) => k.id === mk.ks).subjects.some((x) => x.name === n))
+    .forEach((n) => s.append(chip(n, mk.subject === n, () => { mk.subject = n; renderMarkCtx(); })));
+  if (mk.subject && mk.ks && !CUR.keyStages.find((k) => k.id === mk.ks).subjects.some((x) => x.name === mk.subject)) mk.subject = null;
+  const w = mWords();
+  $("mCount").textContent = w + (w === 1 ? " word" : " words");
+  const ready = mk.ks && mk.year && mk.subject && w >= 40;
+  $("mGo").disabled = !ready || mk.busy;
+  $("mHint").textContent = !(mk.ks && mk.year && mk.subject) ? "Choose a key stage, year and subject." : w < 40 ? "Paste an essay of at least 40 words." : "Ready to mark.";
+}
+$("mEssay").addEventListener("input", renderMarkCtx);
+$("mSample").onclick = () => { Object.assign(mk, { ks: SAMPLE.ks, year: SAMPLE.year, subject: SAMPLE.subject }); $("mQ").value = SAMPLE.question; $("mEssay").value = SAMPLE.essay; renderMarkCtx(); };
+
+function mErr(msg) { $("mErr").textContent = msg; $("mErr").classList.toggle("hidden", !msg); }
+
+async function markEssay() {
+  mErr(""); mk.busy = true; renderMarkCtx();
+  $("mOut").classList.add("hidden"); $("mLoading").classList.remove("hidden");
+  $("mLoading").scrollIntoView({ behavior: "smooth", block: "center" });
+  try {
+    const r = await fetch("/api/mark", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ks: mk.ks, year: mk.year, subject: mk.subject, question: $("mQ").value, essay: $("mEssay").value }) });
+    let data; try { data = await r.json(); } catch { throw new Error("The server did not answer. Please try again."); }
+    if (!r.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+    mk.result = data; mk.essay = $("mEssay").value.replace(/\r\n/g, "\n").trim();
+    renderMarkOut();
+    $("mOut").classList.remove("hidden");
+    $("mOut").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) { mErr(e.message); }
+  mk.busy = false; $("mLoading").classList.add("hidden"); renderMarkCtx();
+}
+$("mGo").onclick = markEssay;
+
+function renderMarkTotal() {
+  const t = mk.result.criteria.reduce((a, c) => a + c.score, 0), max = mk.result.criteria.length * 5;
+  $("mTotal").textContent = `${t} / ${max}`;
+}
+function renderMarkOut() {
+  const R = mk.result;
+  $("mOff").textContent = R.onTopic ? "" : "⚠ " + R.offTopicNote;
+  $("mOff").classList.toggle("hidden", R.onTopic);
+  const g = $("mCrit"); g.innerHTML = "";
+  R.criteria.forEach((c) => {
+    const val = el("span", {}, c.score + "/5");
+    const dots = el("div", { class: "dots" });
+    const paint = () => { val.textContent = c.score + "/5"; dots.innerHTML = ""; for (let i = 1; i <= 5; i++) dots.append(el("i", { class: i <= c.score ? "on" : "" })); renderMarkTotal(); };
+    const minus = el("button", { type: "button", title: "Lower", onclick: () => { c.score = Math.max(0, c.score - 1); paint(); } }, "−");
+    const plus = el("button", { type: "button", title: "Raise", onclick: () => { c.score = Math.min(5, c.score + 1); paint(); } }, "+");
+    g.append(el("div", { class: "crit" }, el("div", { class: "crit-h" }, el("b", {}, c.name), el("div", { class: "score" }, minus, val, plus)), dots, el("p", {}, c.reason)));
+    paint();
+  });
+  const src = $("mSrc"); src.innerHTML = "";
+  if (R.sources.length) {
+    const s = el("details", { class: "src", style: "margin-top:12px" }, el("summary", {}, "From the National Curriculum"));
+    R.sources.forEach((q) => s.append(el("q", {}, q.text[0].toUpperCase() + q.text.slice(1)), el("div", { class: "t" }, q.topic)));
+    s.append(el("a", { href: CUR.source.pdf, target: "_blank", rel: "noopener" }, "DfE, The national curriculum in England (2014)"));
+    src.append(s);
+  }
+  // essay with highlights (in order of appearance, no overlaps)
+  const text = mk.essay;
+  const spans = [];
+  R.highlights.forEach((h) => { const i = text.indexOf(h.quote); if (i >= 0 && !spans.some((s) => i < s.end && i + h.quote.length > s.start)) spans.push({ start: i, end: i + h.quote.length, h }); });
+  spans.sort((a, b) => a.start - b.start);
+  const box = $("mText"); box.innerHTML = ""; const list = $("mComments"); list.innerHTML = "";
+  let pos = 0;
+  const activate = (n) => { document.querySelectorAll(".hl,.comments li").forEach((e) => e.classList.toggle("active", e.dataset.n === String(n))); };
+  spans.forEach((s, idx) => {
+    const n = idx + 1;
+    box.append(document.createTextNode(text.slice(pos, s.start)));
+    box.append(el("span", { class: "hl " + (s.h.type === "strength" ? "s" : "i"), "data-n": n, onclick: () => { activate(n); list.children[idx].scrollIntoView({ behavior: "smooth", block: "nearest" }); } }, text.slice(s.start, s.end), el("sup", {}, String(n))));
+    pos = s.end;
+    list.append(el("li", { "data-n": n, onclick: () => activate(n) },
+      el("span", { class: "tag" }, s.h.type === "strength" ? "What works" : "To improve"),
+      el("span", {}, s.h.comment), el("div", { class: "q" }, "“" + s.h.quote + "”")));
+  });
+  box.append(document.createTextNode(text.slice(pos)));
+  if (!spans.length) list.append(el("li", {}, "No highlights this time. Try marking again."));
+  $("mSummary").value = R.summary;
+}
+$("mCopy").onclick = async () => { const ok = await copyText($("mSummary").value); $("mCopy").textContent = ok ? "Copied ✓" : "Select and copy"; setTimeout(() => ($("mCopy").textContent = "Copy"), 2000); };
+
 // ================= VIEWS =================
 function showView() {
-  const v = location.hash === "#chat" ? "chat" : "planner";
+  const v = location.hash === "#chat" ? "chat" : location.hash === "#marker" ? "marker" : "planner";
   $("view-planner").classList.toggle("hidden", v !== "planner");
   $("view-chat").classList.toggle("hidden", v !== "chat");
+  $("view-marker").classList.toggle("hidden", v !== "marker");
   document.querySelectorAll(".tab[data-view]").forEach((t) => t.classList.toggle("on", t.dataset.view === v));
   showErr("");
   window.scrollTo({ top: 0 });
@@ -849,7 +1023,7 @@ window.addEventListener("hashchange", showView);
 fetch("curriculum.json").then((r) => r.json()).then((d) => {
   CUR = d;
   $("srcTop").href = d.source.url; $("srcFoot").href = d.source.pdf;
-  renderS1(); setStep(1); renderChatCtx(); showView();
+  renderS1(); setStep(1); renderChatCtx(); renderMarkCtx(); showView();
 }).catch(() => showErr("The curriculum could not load. Please refresh the page."));
 </script>
 </body>
