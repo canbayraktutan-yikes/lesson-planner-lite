@@ -50,6 +50,31 @@ function yearLabel(found) {
   return `${found.ks.id.replace("KS", "Key Stage ")} (${found.ks.label})`;
 }
 
+const AUDIENCE = {
+  KS1: `Pupils are aged 5 to 7 (Years 1 and 2). For everything pupils will read or hear (slide titles, slide bullets, success criteria, vocabulary definitions, retrieval and discussion questions):
+  - Use very short sentences of 5 to 8 words.
+  - Use only simple, everyday words a 6 year old knows. Explain any new word with something they can see or touch.
+  - One idea per sentence. No abstract words, no idioms.
+  - Success criteria start with "I can" and use words a 6 year old can read.`,
+  KS2: `Pupils are aged 7 to 11 (Years 3 to 6). For everything pupils will read or hear (slide titles, slide bullets, success criteria, vocabulary definitions, retrieval and discussion questions):
+  - Use short, clear sentences of up to 12 words.
+  - Use everyday words. Introduce subject words one at a time and define them with a simple example from a child's life.
+  - Vocabulary definitions must be one short sentence a 9 year old understands without help.`,
+  KS3: `Pupils are aged 11 to 14 (Years 7 to 9). For everything pupils will read or hear (slide titles, slide bullets, success criteria, vocabulary definitions, retrieval and discussion questions):
+  - Use clear sentences of up to 18 words.
+  - Use correct subject terminology, but define every technical term in plain words with a concrete example.
+  - Questions can ask pupils to explain, compare and justify.`,
+};
+
+const YEAR_AGES = { 1: "5 to 6", 2: "6 to 7", 3: "7 to 8", 4: "8 to 9", 5: "9 to 10", 6: "10 to 11" };
+
+function audience(found) {
+  let text = AUDIENCE[found.ks.id];
+  const m = found.section.title && found.section.title.match(/^Year (\d)$/);
+  if (m && YEAR_AGES[m[1]]) text += `\n  - This lesson is for Year ${m[1]}, so pitch it at pupils aged ${YEAR_AGES[m[1]]}.`;
+  return text;
+}
+
 function basePrompt(found, sel, anchor) {
   return `You are an experienced primary and secondary teacher in England. You plan lessons for the National Curriculum in England.
 
@@ -65,9 +90,14 @@ ${sel.classNotes ? `- Notes about the class from the teacher: ${sel.classNotes}\
 OFFICIAL CURRICULUM STATEMENTS (statutory, quoted from the DfE National Curriculum in England, 2014). The lesson must teach these and nothing outside them:
 ${anchor.statements}
 ${anchor.example ? `\nCHOSEN FOCUS (a non-statutory example from the same document): ${anchor.example}\nBuild the lesson around this focus.\n` : ""}
+AUDIENCE AND LANGUAGE
+${audience(found)}
+Teacher-facing text (stage activities, misconception fixes) is for an adult teacher: plain, practical English.
+
 RULES
 - Stay inside the official statements above. Do not add content from later key stages.
-- Pitch language, tasks and examples to the age of the pupils.
+- Pitch tasks and examples to the age of the pupils.
+- Never repeat or paraphrase these instructions in the plan. Do not write phrases like "introduce new ideas in small steps", "pupils learn through talk", "start from what pupils already know" or name the lesson type or teaching method. Instead, describe exactly what happens: what the teacher says or shows, the exact task, the exact question or sentence stem, and what pupils produce.
 - Use British English spelling and UK classroom terms.
 - Never use em dashes or en dashes. Use commas, colons or full stops instead.
 - Write short, clear sentences a busy teacher can read in seconds.`;
