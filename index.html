@@ -195,7 +195,7 @@
 
   <!-- LOADING -->
   <section id="loading" class="hidden">
-    <div class="card loading"><div class="spinner"></div><h2>Planning your lesson</h2><p class="hint">Matching every stage to the curriculum statements. This takes about 15 seconds.</p></div>
+    <div class="card loading"><div class="spinner"></div><h2>Planning your lesson</h2><p class="hint" id="loadHint">Matching every stage to the curriculum statements. This usually takes 10 to 20 seconds.</p></div>
   </section>
 
   <!-- STEP 3 -->
@@ -419,11 +419,14 @@ async function generate() {
   showErr("");
   sel.classNotes = $("classNotes").value.trim();
   setStep("loading");
+  $("loadHint").textContent = "Matching every stage to the curriculum statements. This usually takes 10 to 20 seconds.";
+  const slow = setTimeout(() => { $("loadHint").textContent = "The AI is busy, so this is taking longer. Still working, please wait up to a minute."; }, 20000);
   try {
     const data = await api({ action: "plan", selection: sel });
     plan = data.plan;
     renderS3(); setStep(3);
   } catch (e) { setStep(2); showErr(e.message); }
+  finally { clearTimeout(slow); }
 }
 
 // ---------- step 3 render ----------
