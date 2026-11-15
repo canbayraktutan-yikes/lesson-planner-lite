@@ -724,7 +724,9 @@ function renderChatMeta() {
   $("cCtx").textContent = ready ? "Answering for: " + ctxLabel() : "Choose a key stage and year to start.";
   $("cInput").disabled = !ready || chat.busy;
   $("cInput").placeholder = ready ? "Ask about a topic, the curriculum or a lesson idea" : "Choose a key stage and year first";
-  $("cSend").disabled = !ready || chat.busy;
+  $("cSend").disabled = !ready;
+  $("cSend").textContent = chat.busy ? "Stop" : "Send";
+  $("cSend").classList.toggle("ghost", chat.busy);
   $("cNew").classList.toggle("hidden", !chat.messages.length);
 }
 
@@ -797,14 +799,17 @@ async function send(text) {
   chat.busy = true; renderChatMeta(); renderLog();
   const t = chatTopic();
   const ctx = { ks: chat.ks, year: chat.year, subject: chat.subject, section: t ? t.section : null, topic: t ? t.topic.title : null };
+  chat.ctrl = new AbortController();
   try {
-    const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ context: ctx, messages: chat.messages.map((m) => ({ role: m.role, text: m.text })) }) });
+    const r = await fetch("/api/chat", { method: "POST", signal: chat.ctrl.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ context: ctx, messages: chat.messages.map((m) => ({ role: m.role, text: m.text })) }) });
     let data; try { data = await r.json(); } catch { throw new Error("The server did not answer. Please try again."); }
     if (!r.ok) throw new Error(data.error || "Something went wrong. Please try again.");
     chat.messages.push({ role: "assistant", answer: data.answer, points: data.points, sources: data.sources, text: [data.answer, ...(data.points || []).map((x) => "- " + x)].join("\n"), offer: data.offerLessonPlan && t ? { ks: chat.ks, subject: chat.subject, section: t.section, topic: t.topic.title } : null });
   } catch (e) {
-    chat.messages.push({ role: "assistant", text: "Sorry, I couldn't answer just now. " + e.message });
+    if (e.name === "AbortError") chat.messages.push({ role: "assistant", text: "Stopped. Ask me again whenever you are ready." });
+    else chat.messages.push({ role: "assistant", text: "Sorry, I couldn't answer just now. " + e.message });
   }
+  chat.ctrl = null;
   chat.busy = false; renderChatMeta(); renderLog();
   $("cInput").focus();
 }
@@ -819,7 +824,7 @@ function planFromChat(o) {
 function autoGrow() { const t = $("cInput"); t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 160) + "px"; }
 $("cInput").addEventListener("input", autoGrow);
 $("cInput").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
-$("cSend").onclick = () => send();
+$("cSend").onclick = () => { if (chat.busy) { if (chat.ctrl) chat.ctrl.abort(); } else send(); };
 $("cNew").onclick = () => { chat.messages = []; renderChatMeta(); renderLog(); };
 
 // ================= VIEWS =================
